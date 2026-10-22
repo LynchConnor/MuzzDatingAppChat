@@ -13,16 +13,10 @@ data class Message(
     val message: String,
     val messageSent: LocalDateTime = LocalDateTime.now()
 ) {
-    var isMine: Boolean
-        get() = senderId == Contact.Connor.id
-        set(value) {
-            senderId = if (value) {
-                Contact.Connor.id
-            } else {
-                Contact.Muzz.id
-            }
-        }
+    /**
+     * Simple get property to check if the message was from Connor or not
+     */
+    val isMine: Boolean get() = senderId == Contact.Connor.id
 
-    val key: String
-        get() = "message:$id"
+    val key: String get() = id
 }

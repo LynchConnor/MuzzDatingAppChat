@@ -7,7 +7,7 @@
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="MuzzDatingAppChat"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MuzzDatingAppChat">
@@ -15,7 +15,7 @@
             android:name=".MainActivity"
             android:windowSoftInputMode="adjustResize"
             android:exported="true"
-            android:label="@string/app_name"
+            android:label="MuzzDatingAppChat"
             android:theme="@style/Theme.MuzzDatingAppChat">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -17,7 +17,6 @@ object MessageSeparation {
     fun messageSeparation(message: Message, nextMessage: Message?): Int {
         val nextMessage = nextMessage ?: return 16
         val secondsUntilNext = Duration.between(message.messageSent, nextMessage.messageSent).seconds
-        Log.d(TAG, "Duration: $secondsUntilNext")
         return if (message.senderId == nextMessage.senderId && secondsUntilNext < 20) 4 else 12
     }
 

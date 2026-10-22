@@ -4,6 +4,9 @@ import androidx.room3.ColumnTypeConverter
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+/**
+ * A simple converter to allow LocalDateTime to exist in Room Database inside of Message.
+ */
 class LocalDateTimeConverters {
     private val fmt = DateTimeFormatter.ISO_LOCAL_DATE_TIME
     @ColumnTypeConverter

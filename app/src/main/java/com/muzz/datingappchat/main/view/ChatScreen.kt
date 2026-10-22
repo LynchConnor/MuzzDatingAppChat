@@ -61,17 +61,16 @@ fun ChatScreen(
     contactName: String,
     messages: List<Message>,
     state: ChatUIState,
-    sendingAsContact: Boolean,
     onSend: (String) -> Unit,
     onToggleSender: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Scaffold(
         modifier = modifier,
-        topBar = { ChatTopBar(contactName, sendingAsContact, onToggleSender) },
+        topBar = { ChatTopBar(contactName, onToggleSender) },
         bottomBar = {
             ChatInput(
-                placeholder = "Type a message",
+                placeholder = "Type message as $contactName...",
                 onSend = onSend,
                 modifier = Modifier
                     .navigationBarsPadding()
@@ -145,7 +144,6 @@ fun MessageList(items: List<Message>, modifier: Modifier = Modifier) {
 @Composable
 fun ChatTopBar(
     contactName: String,
-    sendingAsContact: Boolean,
     onToggleSender: () -> Unit,
 ) {
     var menuOpen by remember { mutableStateOf(false) }
@@ -159,24 +157,25 @@ fun ChatTopBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
 
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Avatar(contactName, modifier = Modifier.clickable { onToggleSender() })
-                Spacer(Modifier.width(10.dp))
-                Text(
-                    text = contactName,
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
+                Row(
+                    modifier = Modifier.weight(1f).clickable { onToggleSender() },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Avatar(contactName)
+                    Spacer(Modifier.width(10.dp))
+                    Text(
+                        text = contactName,
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            Spacer(Modifier.weight(1f))
             Box {
                 IconButton(onClick = { menuOpen = true }) {
                     Icon(
                         Icons.Default.MoreVert,
-                        contentDescription = stringResource(R.string.more_options),
+                        contentDescription = "more options",
                         modifier = Modifier.rotate(90f),
                         tint = colors.onSurfaceVariant,
                     )
@@ -184,7 +183,7 @@ fun ChatTopBar(
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
                         text = {
-                            Text("Send message...")
+                            Text("Change User")
                         },
                         onClick = {
                             menuOpen = false
@@ -222,7 +221,6 @@ private fun ChatScreenPreview() {
             contactName = "Sarah",
             state = ChatUIState.Messages,
             messages = mockItems,
-            sendingAsContact = false,
             onSend = {},
             onToggleSender = {},
         )

@@ -19,7 +19,6 @@ fun ChatView() {
     val context = LocalContext.current
 
     val messagesDao = MuzzDatingDatabase.getDatabase(context).messagesDao()
-    val messages by messagesDao.fetchMessages().collectAsStateWithLifecycle(listOf())
 
     val viewModel = viewModel<ChatViewModel>(
         factory = object : ViewModelProvider.Factory {
@@ -31,16 +30,12 @@ fun ChatView() {
 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val contact by viewModel.contact.collectAsStateWithLifecycle()
-
-    val sendingAsContact by remember(contact) {
-        derivedStateOf { contact == Contact.Connor }
-    }
+    val messages by viewModel.messages.collectAsStateWithLifecycle()
 
     ChatScreen(
         contactName = contact.name,
         messages = messages,
         state = state,
-        sendingAsContact = sendingAsContact,
         onSend = { viewModel.sendMessage(it) },
         onToggleSender = { viewModel.toggleContact() }
     )

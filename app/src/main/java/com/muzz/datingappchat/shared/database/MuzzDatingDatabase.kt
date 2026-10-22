@@ -17,7 +17,7 @@ abstract class MuzzDatingDatabase: RoomDatabase() {
     companion object {
 
         /*
-        SINGLETON APPROACH SO I CAN ACCESS MUZZDATINGDATABASE ANYWHERE WITHIN THE APP, SO LONG AS I HAVE ACCESS TO A CONTEXT. INIT ONCE AND SHARED.
+        Singleton approach so I can access MuzzDatingDatabase anywhere within the app, as long as I have access to a Context. Initialised once and shared.
          */
 
         @Volatile

@@ -15,9 +15,9 @@ private fun at(hours: Long, minutes: Long = 0, seconds: Long = 0) =
     start.plusHours(hours).plusMinutes(minutes).plusSeconds(seconds)
 
 /**
- * USED CLAUDE TO GENERATE THE MOCK DATA TO MATCH THE IMPLEMENTATION OUTLINED IN THE DOC.
- * CREATED A BASIC TIME ADJUSTMENT FUNCTION IN ORDER TO SEE SEPERATED MESSAGES AND MAKE
- * SURE THE UI MATCHES THE LOGIC
+ * Used Claude to generate the mock data to match the implementation outlined in the doc.
+ * Created a basic time adjustment function in order to see separated messages and make
+ * sure the UI matches the logic.
  */
 val mockItems = listOf(
     // Section: first message. Over a week old, so the header shows a date.
@@ -47,7 +47,6 @@ val mockItems = listOf(
     Message(senderId = Contact.Muzz.id, message = "Actually just about to go shopping, got any recommendations for a good shoe shop? I'm a fashion disaster", messageSent = at(24, 1, 5)),
     // Normal gap below: same sender, but 25s later.
     Message(senderId = Contact.Muzz.id, message = "The last one went on for hours", messageSent = at(24, 1, 15)),
-    Message(senderId = Contact.Muzz.id, message = "Help", messageSent = at(24, 1, 40)),
 )
 
 @PreviewLightDark
@@ -58,7 +57,6 @@ private fun ChatScreenPreview() {
             contactName = "Sarah",
             state = ChatUIState.Messages,
             messages = mockItems,
-            sendingAsContact = false,
             onSend = {},
             onToggleSender = {},
         )

@@ -58,7 +58,6 @@ private fun ChatScreenPreview() {
             contactName = Contact.Muzz.name,
             state = ChatUIState.Messages,
             messages = mockItems,
-            sendingAsContact = false,
             onSend = {},
             onToggleSender = {},
         )

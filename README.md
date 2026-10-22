@@ -1,105 +1,42 @@
-# Muzz Chat – Android Exercise
+## Muzz Chat
 
-A single-screen chat between two fixed users, built with Jetpack Compose and Room. Messages persist locally, update the UI through a `Flow`, and are grouped by the spacing and section rules from the brief.
-
-## Running it
-
-1. Open the project in Android Studio and run the `app` configuration on an emulator or a device (API 35+).
-2. Run the unit tests with `./gradlew :app:testDebugUnitTest`.
-
-On first launch the database is seeded with a sample conversation. To reseed it, clear the app's data:
-
-```
-adb shell pm clear com.muzz.datingappchat
-```
-
-## How the brief is met
-
-| Requirement | Implementation |
-|---|---|
-| Newest messages at the bottom | `LazyColumn` with `reverseLayout = true` and a newest-first list, so the list starts at the bottom and stays anchored to the input. It scrolls to the newest message when one arrives. |
-| Sent vs received bubbles | My messages are pink and right-aligned. The other user's are grey and left-aligned. |
-| Small separation | `MessageSeparation.messageSeparation` gives a 4dp gap below a message when the **next** message is from the same sender and is sent **less than 20s** later. Otherwise the gap is 12dp. |
-| Section headers | `MessageSeparation.showsSectionHeader` shows a header ("**Thursday** 11:59") above a message when there is **no previous message**, or the previous one was sent **more than an hour** earlier. |
-| Two-way messaging | The ⋯ menu (or tapping the avatar) switches who you are sending as, so both sides of the conversation can be written from one device. |
-| No network | All messages are created on the device. A sample conversation is inserted on first launch when the database is empty. |
-| Persistence (bonus) | Room stores messages. The DAO returns a `Flow`, so a sent message appears in the list without any manual refresh. |
-
-## Architecture
-
-A single module using MVVM and unidirectional data flow:
-
-```
-Room (MessagesDao: Flow<List<Message>>)
-        │
-ChatViewModel  ── seeds on first launch, sends messages, holds the current sender
-        │ StateFlow
-ChatView       ── wires the ViewModel to the screen
-        │
-ChatScreen     ── stateless Compose UI (previewable with sample data)
-```
-
-- **`shared/`**: the data layer. It holds the `Message` entity, `MessagesDao`, the Room database and a `LocalDateTime` converter.
-- **`main/viewModel/`**: `ChatViewModel`. Database work runs in `viewModelScope` off the main thread, so it isn't repeated on recomposition and survives configuration changes.
-- **`main/view/`**: the Compose UI. `ChatScreen` takes plain data and callbacks and owns no state, which makes it easy to preview and reason about.
-- **`main/MessageSeparation.kt`**: the brief's two layout rules as pure functions with no Android UI dependencies, so they can be unit tested directly.
-
-I deliberately left out a repository layer, use cases, dependency injection and multiple modules. With one screen and one data source, they would add files without adding clarity. See [With more time](#with-more-time) for when I would add them.
-
-## Key decisions
-
-- **Each rule uses the neighbour it describes.** The list is newest first, so for item `index` the previous (older) message is `index + 1` and the next (newer) message is `index - 1`. The header rule uses the previous message and the spacing rule uses the next one. That way each function reads like the sentence in the brief, and the first message gets its header without a special case.
-- **Rules are pure functions.** Keeping the time maths out of composables means the edge cases (exactly 20s, exactly 1h) are covered by fast JVM tests rather than by eye.
-- **Boundaries follow the brief's wording.** "Less than 20 seconds" means 20s exactly is a normal gap. "More than an hour" means exactly 1h has no header.
-- **The header gap is measured from the previous message, not the last header.** Several messages 50 minutes apart never get a header, even if the conversation covers hours.
-- **Seed data doubles as a test fixture.** `MockMessages.kt` is written to show every rule on screen: a 19s pair, exactly 20s, a sender change, exactly 1h, 1h 1s, a chain of 50-minute gaps, a new day and a group of three. Each entry has a comment stating the expected result.
-- **The section header follows the device's 12/24-hour setting.**
-- **Muzz styling.** The colours are taken from the Muzz brand pink, with light and dark themes. Dynamic colour is turned off so the app looks the same on every device.
+A simple chat screen between two users, built with Jetpack Compose and Room.
 
 ## Assumptions
+A few assumptions were made throughout this exercise:
+- It didn't matter when switching between users that it appeared that they were the main user. When switching we assume that the current user is still 'Connor', and when switching we are just inputting the text. Everything appears from 'Connor's perspective.
+- The back button had no use, so it wasn't included in the app.
+- No networking logic was included as requested in 'Not Required', so the only fetching was from Room.
+- Messages exactly 1 hour do not get a section; messages with a gap of more than 1 hour do
+- Messages exactly 20s apart get a normal gap; only messages under 20s apart get the smaller gap
 
-- There are exactly two fixed users and one conversation. "Me" is `Contact.Connor`, and the other user is `Contact.Muzz`.
-- Times are stored as `LocalDateTime` in device local time. Time zones and changes to the device clock are out of scope.
-- Messages are text only. Empty or whitespace-only messages are not sent.
-- The back button, read receipts and typing indicators in the design screenshot weren't part of the brief, so I left them out.
-- The section header shows the weekday name, as in the brief's example ("Thursday 11:59").
+## Decisions
+- I've kept the project intentionally simple using the principles of KISS. Only programming the essential features of a chat app and keeping the code abstracted with clear comments.
+- MVVM was chosen as the design pattern, mainly because this is what I'm used to and for a simple app like this it was ideal. An even simpler design pattern could've been implemented with just MV, but separating code makes it easier to understand and keep logic separated for cleaner UIs and for understanding the code better as it's separated into its core components.
+- The decision to implement a UIState was chosen in order to split up the view logic, when displaying loading, errors and messages, rather than having separate MutableStateFlow(false), this way it's a lot cleaner and can handle the different states.
+- Additionally, the decision was made to make all viewModel properties read-only from the view so it can only change from inside the viewModel
+- Instead of fetching the messages and storing it in the viewModel, I decided to use flows inside of Room so the messages auto update. This is ideal because after each message we don't have to append the array and/or fetch the messages again, it happens automatically inside of Room @Query Flow.
+- I created a separate MessageSeparation object that holds the logic of message separation and when to show sections, matching the logic required in the project. I decided to make it a separate object so it was testable and reusable.
+- try catch was added as a decision, despite not specified in the document, it's essential to prevent issues relating to out of storage errors that can come around as a result of Room - a broken app is no good, so it's better safe than sorry.
+- I took the decision that when switching between Contacts it would always show Connor as the main user, any message from Muzz would show like it was a response to Connor. This was to save on complexity and time.
+- As a chat app, I made the decision as well to hide the keyboard when scrolling, this is pretty standard across all chat apps and although it wasn't mentioned in the spec, it is necessary as part of a chat feature.
 
-## Language techniques
+## Tests
+- Tests check the logic in MessageSeparation to make sure the messages have the correct separation and sections are shown correctly. Claude and I worked on the tests together, including the mock data, to make sure every rule in the brief was covered. I reviewed and ran them, and fixed the bugs they found (such as reversed `Duration.between` arguments and the wrong neighbouring message being used).
 
-- **Sealed interface** `ChatUIState` with an exhaustive `when` in the UI.
-- **`StateFlow` / `Flow`** from Room through to `collectAsStateWithLifecycle`, so collection stops when the app is in the background.
-- **Enum with behaviour**: `Contact` has its `id` and a `toggle()`.
-- **Kotlin idioms**: `?:` early returns, `getOrNull` for list neighbours, destructuring (`val (container, content) = …`), default and named arguments, and the `@Volatile` singleton database.
-- **Compose**: `remember`/`derivedStateOf` to avoid needless recomposition, stable `key`s and `animateItem()` for list animations, and `@PreviewLightDark` previews.
-
-## Testing
-
-`MessageSeparationTest` covers both layout rules:
-
-- **Spacing**: 15s and 19s are small, 20s and 21s are normal, a different sender is always normal, and the other user's messages group too. A whole conversation is also checked in on-screen order.
-- **Headers**: the first message always has one, exactly 1h has none, 1h 1s has one, and the gap is measured from the previous message rather than the last header.
+## Good techniques
+- As part of my daily app development, I use collectAsStateWithLifecycle(), derivedStateOf and remember in the views, this is so that data stays within the lifecycle of the view and stops collecting in the background, derivedStateOf prevents recompositions so it only recomposes when values change and remember keeps values across recomposition. 
+- I used sealed interfaces for managing UIState, this was so I can use when, if I decide to add another state, then it will shout at me to add that state to the view.
+- Abstracting code into components and separating them into folders with similar functions, this is for simplicity's sake.
 
 ## Limitations
-
-- **Two-way messaging is a manual switch**, not a simulated reply from the other user.
-- **No message ordering in SQL.** `fetchMessages()` relies on insertion order. That works because messages are only ever appended, but an `ORDER BY messageSent` would make it explicit.
-- **The ViewModel isn't the single source of the message list.** `ChatView` collects the DAO `Flow` directly. Combining messages and sender into one `StateFlow` in the ViewModel would be cleaner and easier to test.
-- **Errors are only logged.** If an insert fails (for example, when storage is full), the user isn't told.
-- **No paging.** The whole conversation is loaded into memory, which is fine for a demo but not for long chat histories.
-- **No UI or instrumented tests.** Only the pure rules are tested.
-
-## With more time
-
-- Move message collection into the ViewModel (`combine(messages, contact).stateIn(…)`) and test it with a fake DAO and an injected `Clock`.
-- Add a repository in front of Room. That's where a real backend would plug in to sync with the server, with Room staying the source of truth for the UI.
-- Add Hilt once there is more than one screen or dependency to inject.
-- Add a simulated reply from the other user, plus a typing indicator.
-- Add delivery and read ticks, message failure and retry states, and timestamps on long press.
-- Add Paging 3 for long conversations.
-- Add Compose UI tests for sending a message and for the header and spacing layout, and screenshot tests for light and dark themes.
-- Add accessibility work: content descriptions that read the sender and time for each bubble, and testing with large font sizes and TalkBack.
-- Add a CI workflow on GitHub Actions that runs the tests and lint on every push.
+- For the errors it would be good to provide the user with a better error, like if it threw an error due to storage, we could tell them they're out of storage in a user-friendly way.
+- Once the chat is there, it stays, there is no way of deleting the chat and starting from scratch. If given more time it would be useful to be able to refresh it.
+- As mentioned in decisions, I made switching contacts keep Connor as the main contact, this means switching to Muzz still appears like it's Connor's chat, although this was intentional, with more time it would be beneficial that when switching it shows the chat from the individual contact's perspective.
+- Given more time I would also test the viewModel with a fake dao to check data was fetched correctly and create UI tests to confirm components worked as intended and to discover any potential bugs.
+- Supporting those with disabilities is important when implementing accessibility features, this would be ideal in a submitted app, but for simplicity, this feature was ignored.
 
 ## Use of AI
-
-I used Claude (Claude Code) as a pair programmer during this exercise. I used it to plan the approach, review my code, find bugs (such as reversed `Duration.between` arguments and off-by-one neighbour indices), write the seed data, and help write the unit tests and this README. I made the design decisions and wrote, read and tested the code myself, and I can explain any part of it.
+- Claude code was used to help me build tests for the logic, as well as building mock data for the previews and seed data - to save me time building it myself whilst I worked on the logic and structure of the app.
+- Claude assisted in building certain UI components and built the colour theme to match the theme in the example UI.
+- Claude assisted in the README.md, including structure.

@@ -28,11 +28,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
-import com.muzz.datingappchat.R
 
 @Composable
 fun ChatInput(
@@ -92,7 +90,7 @@ fun ChatInput(
                     disabledContentColor = colors.onPrimary,
                 ),
             ) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.send))
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "send")
             }
         }
     }

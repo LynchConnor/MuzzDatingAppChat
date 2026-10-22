@@ -10,22 +10,21 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface MessagesDao {
     @Insert
-    fun addMessage(message: Message)
+    suspend fun addMessage(message: Message)
 
     /**
-     * FETCHING MESSAGES IN A FLOW ALLOWS THE USE OF .ASLIVEDATA AND COLLECTASSTATE IN THE VIEW. AUTOMATICALLY UPDATING WITHOUT USE OF FETCH
+     * Fetching messages as a Flow means the list updates automatically whenever the table changes, without fetching again.
      */
-    @Query("SELECT * FROM Message")
+    @Query("SELECT * FROM Message ORDER BY messageSent")
     fun fetchMessages(): Flow<List<Message>>
 
     /**
-     * FETCHING THE TOTAL COUNT OF MESSAGE IN ROOM
+     * Fetches the total number of messages in Room.
      */
     @Query("SELECT COUNT(*) FROM Message")
     suspend fun fetchMessagesCount(): Int
 
     @Insert
-    fun insertAll(messages: List<Message>)
-
+    suspend fun insertAll(messages: List<Message>)
 
 }
