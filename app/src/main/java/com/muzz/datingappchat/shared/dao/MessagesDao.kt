@@ -15,7 +15,7 @@ interface MessagesDao {
     /**
      * Fetching messages as a Flow means the list updates automatically whenever the table changes, without fetching again.
      */
-    @Query("SELECT * FROM Message ORDER BY messageSent")
+    @Query("SELECT * FROM Message ORDER BY messageSent DESC")
     fun fetchMessages(): Flow<List<Message>>
 
     /**

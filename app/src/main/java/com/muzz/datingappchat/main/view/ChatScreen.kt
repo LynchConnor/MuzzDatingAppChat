@@ -108,7 +108,7 @@ fun MessageList(items: List<Message>, modifier: Modifier = Modifier) {
     }
 
     val newestKey = remember(items) {
-        derivedStateOf { items.lastOrNull()?.key }
+        derivedStateOf { items.firstOrNull()?.key }
     }
 
     /** When a new item gets added, the scroll is scrolled to the bottom**/
@@ -116,12 +116,9 @@ fun MessageList(items: List<Message>, modifier: Modifier = Modifier) {
         listState.animateScrollToItem(0)
     }
 
-    val itemsSorted by remember(items) {
-        derivedStateOf { items.reversed() }
-    }
-
     /**
-     * LazyColumn normally goes from top to bottom but with reverseLayout it goes from
+     * LazyColumn normally goes from top to bottom but with reverseLayout it goes from bottom to top.
+     * The messages are fetched in descending order, so most recent are first and oldest are last
      */
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -130,11 +127,14 @@ fun MessageList(items: List<Message>, modifier: Modifier = Modifier) {
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
     ) {
 
-        items(itemsSorted.indices.toList(), key = { itemsSorted[it].key }) { index ->
+        items(items.indices.toList(), key = { items[it].key }) { index ->
+            /**
+             * We get the previous and next message to understand the gap between messages and know when to show a section header
+             */
             MessageBubble(
-                message = itemsSorted[index],
-                previousMessage = itemsSorted.getOrNull(index + 1),
-                nextMessage = itemsSorted.getOrNull(index - 1),
+                message = items[index],
+                previousMessage = items.getOrNull(index + 1),
+                nextMessage = items.getOrNull(index - 1),
                 modifier = Modifier.animateItem(),
             )
         }
@@ -220,7 +220,7 @@ private fun ChatScreenPreview() {
         ChatScreen(
             contactName = "Sarah",
             state = ChatUIState.Messages,
-            messages = mockItems,
+            messages = mockItems.reversed(),
             onSend = {},
             onToggleSender = {},
         )

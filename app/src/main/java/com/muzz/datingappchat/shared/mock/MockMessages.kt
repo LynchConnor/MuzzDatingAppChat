@@ -21,7 +21,7 @@ private fun at(hours: Long, minutes: Long = 0, seconds: Long = 0) =
  */
 val mockItems = listOf(
     // Section: first message. Over a week old, so the header shows a date.
-    Message(senderId = Contact.Muzz.id, message = "Hey! Saw you're into hiking too", messageSent = start.minusDays(7)),
+    Message(senderId = Contact.Muzz.id, message = "Hey! Saw you're into hiking too", messageSent = start.minusDays(2)),
 
     // Section: 7 days since the previous message. Small gap below (next is mine, 19s later).
     Message(senderId = Contact.Connor.id, message = "Haha yes, love it!", messageSent = at(0)),
@@ -56,7 +56,7 @@ private fun ChatScreenPreview() {
         ChatScreen(
             contactName = "Sarah",
             state = ChatUIState.Messages,
-            messages = mockItems,
+            messages = mockItems.reversed(),
             onSend = {},
             onToggleSender = {},
         )

@@ -75,7 +75,7 @@ private fun ChatScreenPreview() {
         ChatScreen(
             contactName = Contact.Muzz.name,
             state = ChatUIState.Messages,
-            messages = mockItems,
+            messages = mockItems.reversed(),
             onSend = {},
             onToggleSender = {},
         )
